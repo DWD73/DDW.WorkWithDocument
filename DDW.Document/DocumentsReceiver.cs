@@ -11,10 +11,8 @@ namespace DDW.Document
     public class DocumentsReceiver
     {
         FileSystemWatcher fileSystemWatcher;
-        List<string> documents;
-        //public IReadOnlyList<string> documentsRead { get; }
-
-
+        public List<string> documents { get; private set; }
+       
         Timer timer;
 
         public DocumentsReceiver()
@@ -47,9 +45,7 @@ namespace DDW.Document
         }
 
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
-        {
-            //DocumentsArgs args = new DocumentsArgs(e.Name);
-
+        {           
             if (!documents.Contains(e.Name) && documents.Count < 3)
             {
                 documents.Add(e.Name);               
@@ -58,9 +54,8 @@ namespace DDW.Document
             if(documents.Count == 3)
             {
                 OnDocumentsReady(new DocumentsArgs(e.Name, documents.Count));
-            }
-
-            
+                timer.Stop();
+            }            
         }
 
         public void Start(string path, double waitingInterval)
@@ -92,7 +87,6 @@ namespace DDW.Document
             TimeOut?.Invoke(this, e);
         }
     }
-
     
     public class DocumentsArgs : EventArgs
     {
@@ -101,15 +95,15 @@ namespace DDW.Document
         /// </summary>
         public string FileName { get; }
 
+        /// <summary>
+        /// Количество файлов
+        /// </summary>
         public int CountFiles { get; }
 
-
         public DocumentsArgs(string fileName, int countFiles)
-        {
-            FileName = string.IsNullOrEmpty(fileName) ? string.Empty : fileName;
+        {          
+            FileName = string.IsNullOrEmpty(fileName) ? string.Empty : fileName;            
             CountFiles = countFiles;
-        }
-
-        
+        }       
     }
 }
