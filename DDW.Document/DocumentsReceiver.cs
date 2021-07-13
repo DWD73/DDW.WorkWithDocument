@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace DDW.Document
 {
-    public class DocumentsReceiver
+    public sealed  class DocumentsReceiver : IDisposable
     {
         FileSystemWatcher fileSystemWatcher;
         public List<string> documents { get; private set; }
@@ -29,7 +26,7 @@ namespace DDW.Document
                 IncludeSubdirectories = false              
             };
 
-            fileSystemWatcher.Created += FileSystemWatcher_Created;
+            fileSystemWatcher.Created += FileSystemWatcher_Created;           
         }
 
         private void SetTimer()
@@ -58,9 +55,12 @@ namespace DDW.Document
             }            
         }
 
-        public void Start(string path, double waitingInterval)
+        public void Start(string _pathTargetDirectory, double waitingInterval)
         {
-            fileSystemWatcher.Path = path;
+            if (!Directory.Exists(_pathTargetDirectory))
+            Directory.CreateDirectory(_pathTargetDirectory);
+
+            fileSystemWatcher.Path = _pathTargetDirectory;
             fileSystemWatcher.EnableRaisingEvents = true;
 
             timer.Interval = waitingInterval;
@@ -73,18 +73,22 @@ namespace DDW.Document
             OnTimeOut(new DocumentsArgs(null, documents.Count));
         }
 
-
         public event EventHandler<DocumentsArgs> DocumentsReady;
         public event EventHandler<DocumentsArgs> TimeOut;
-
-        protected virtual void OnDocumentsReady(DocumentsArgs e)
+        
+        internal void OnDocumentsReady(DocumentsArgs e)
         {
             DocumentsReady?.Invoke(this, e);
         }
-
-        protected virtual void OnTimeOut(DocumentsArgs e)
+        
+        internal void OnTimeOut(DocumentsArgs e)
         {
             TimeOut?.Invoke(this, e);
+        }
+
+        public void Dispose()
+        {
+                           
         }
     }
     

@@ -1,34 +1,38 @@
 ﻿using DDW.Document;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace DDW.Client
 {
     class Program
     {
-        const string pathDirectory = @"C:\Users\User\Desktop\TargetDirectory";
+        const string folderName = "TargetDirectory";
         
         static bool stopReceiveDocuments = false;
 
         static void Main(string[] args)
         {
+
+            string pathTargetDirectory = Path.Combine(Environment.CurrentDirectory, folderName);
+
             //Время приемки документов в милисекундах
             double timeReceiver = 20000;
             TimeSpan interval = TimeSpan.FromMilliseconds(timeReceiver);
 
-            DocumentsReceiver documentsReceiver = new DocumentsReceiver();
+            //DocumentsReceiver documentsReceiver = new DocumentsReceiver();
+            using var documentsReceiver = new DocumentsReceiver();
+            
             documentsReceiver.DocumentsReady += DocumentsReceiver_DocumentsReady;
             documentsReceiver.TimeOut += DocumentsReceiver_TimeOut;
+            documentsReceiver.Start(pathTargetDirectory, timeReceiver);
+                      
 
-            Console.WriteLine($"Запущена процедура приема документов... {interval.Seconds} сек.");
-
-            documentsReceiver.Start(pathDirectory, timeReceiver);
+            Console.WriteLine($"Запущена процедура приема документов... {interval.Seconds} сек.");          
 
             while(!stopReceiveDocuments)
             {
                 
-            }
+            }          
 
             foreach (var doc in documentsReceiver.GetDocuments())
                 Console.WriteLine($"\t{doc}");
