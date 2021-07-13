@@ -1,5 +1,6 @@
 ﻿using DDW.Document;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace DDW.Client
@@ -10,10 +11,16 @@ namespace DDW.Client
         
         static bool stopReceiveDocuments = false;
 
+        static Collection<string> collections;
+
         static void Main(string[] args)
         {
 
             string pathTargetDirectory = Path.Combine(Environment.CurrentDirectory, folderName);
+
+            collections = new Collection<string>{"Паспорт.jpg", "Заявление.txt", "Фото.jpg"};
+
+
 
             //Время приемки документов в милисекундах
             double timeReceiver = 20000;
@@ -24,7 +31,7 @@ namespace DDW.Client
             
             documentsReceiver.DocumentsReady += DocumentsReceiver_DocumentsReady;
             documentsReceiver.TimeOut += DocumentsReceiver_TimeOut;
-            documentsReceiver.Start(pathTargetDirectory, timeReceiver);
+            documentsReceiver.Start(pathTargetDirectory, timeReceiver, collections);
                       
 
             Console.WriteLine($"Запущена процедура приема документов... {interval.Seconds} сек.");          

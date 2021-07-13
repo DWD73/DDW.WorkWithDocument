@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Timers;
 
@@ -7,21 +8,22 @@ namespace DDW.Document
 {
     public sealed  class DocumentsReceiver : IDisposable
     {
-        FileSystemWatcher fileSystemWatcher;
+        readonly FileSystemWatcher fileSystemWatcher;
         public List<string> documents { get; private set; }
        
-        Timer timer;
+        readonly Timer timer;
 
         public DocumentsReceiver()
         {
-            documents = new List<string>();
-            
+            documents = new List<string>();          
+
+            timer = new Timer();
+
             SetTimer();
 
             fileSystemWatcher = new FileSystemWatcher
             {               
-                NotifyFilter = NotifyFilters.FileName,
-                Filters = { "Паспорт.jpg", "Заявление.txt", "Фото.jpg" },
+                NotifyFilter = NotifyFilters.FileName,                     
                 EnableRaisingEvents = false,
                 IncludeSubdirectories = false              
             };
@@ -31,7 +33,7 @@ namespace DDW.Document
 
         private void SetTimer()
         {          
-            timer = new Timer();          
+                  
             timer.Elapsed += OnTimedEvent;
             timer.AutoReset = false;           
         }
@@ -55,10 +57,13 @@ namespace DDW.Document
             }            
         }
 
-        public void Start(string _pathTargetDirectory, double waitingInterval)
+        public void Start(string _pathTargetDirectory, double waitingInterval, Collection<string> _collections)
         {
             if (!Directory.Exists(_pathTargetDirectory))
             Directory.CreateDirectory(_pathTargetDirectory);
+
+            foreach (string file in _collections)
+                fileSystemWatcher.Filters.Add(file);
 
             fileSystemWatcher.Path = _pathTargetDirectory;
             fileSystemWatcher.EnableRaisingEvents = true;
