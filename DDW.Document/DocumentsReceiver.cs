@@ -9,10 +9,10 @@ namespace DDW.Document
     public sealed  class DocumentsReceiver : IDisposable
     {
         readonly FileSystemWatcher fileSystemWatcher;
-        public List<string> documents { get; private set; }
-       
         readonly Timer timer;
-
+        public List<string> documents { get; private set; }
+        private bool disposed = false;
+             
         public DocumentsReceiver()
         {
             documents = new List<string>();          
@@ -91,9 +91,32 @@ namespace DDW.Document
             TimeOut?.Invoke(this, e);
         }
 
+        private void Dispose(bool disposing)
+        {
+            if(!disposed)
+            {
+                if(disposing)
+                {
+                    if(fileSystemWatcher != null)
+                    {
+                        fileSystemWatcher.Created -= FileSystemWatcher_Created;
+                        fileSystemWatcher.Dispose();
+                    }
+                    if(timer != null)
+                    {
+                        timer.Elapsed -= OnTimedEvent;
+                        timer.Dispose();
+                    }
+                }
+
+                disposed = true;
+            }
+        }
+
         public void Dispose()
         {
-                           
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
     
